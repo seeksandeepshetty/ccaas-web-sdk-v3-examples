@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>External chat demo</title>
+  <style>
+    /* Basic styling for the banner */
+    .banner {
+      background-color: #f0f0f0; /* Light grey background */
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between; /* Aligns items to ends */
+      align-items: center; /* Vertically centers items */
+      font-family: sans-serif;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px; /* ADDED: Gap below the banner */
+    }
+    .banner a {
+      text-decoration: none;
+      color: #007bff; /* Blue link color */
+      font-weight: bold;
+    }
+    .banner a:hover {
+      text-decoration: underline;
+    }
+    .banner span {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <span>External chat transfer</span>
+    <a href="/">Demo list</a>
+  </div>
+
+  <!-- An empty element to mount CCaaS Web SDK widget. -->
+  <div id="ccaas-widget"></div>
+
+  <!-- INCLUDE CCaaS WEB SDK Widget -->
+  <script src="https://$CCAAS_HOST/web-sdk/v3/widget.js"></script>
+  <script> 
+    var ccaas = new UJET({
+      companyId: "$COMPANY_ID",
+      host: "https://$CCAAS_HOST",
+      authenticate: getAuthToken
+    });
+      
+    // use `.config` to configure custom data.
+    ccaas.config({
+      customData: {
+        // external_chat_transfer is a special custom data
+        "external_chat_transfer": {
+          "greeting_override": "Please hold while we connect you with a human agent.",
+          "agent": {
+            "name": "Agent Name",
+            "avatar": "https://ujet.s3.amazonaws.com/default-virtual-agent-avatar-1.png"
+          },
+          "transcript": [
+            {
+              "sender": "agent",
+              "timestamp": "2021-03-15 12:00:00Z",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Hello! How can I help you today?"
+                },
+                {
+                  "type": "buttons",
+                  "buttons": [
+                    {
+                      "label": "Create New Order",
+                      "selected": false
+                    },
+                    {
+                      "label": "Check Order Status",
+                      "selected": true
+                    },
+                    {
+                      "label": "Check Account Balance",
+                      "selected": false
+                    },
+                  ]
+                }
+              ]
+            },
+          ]
+        }
+      }
+    });
+
+    ccaas.mount("#ccaas-widget");
+
+    function getAuthToken() {
+      // The `/auth/token` endpoint in this demo is powered by `app.js` at the source root
+      // YOU SHOULD HAVE THIS KIND OF API ON YOUR SERVER
+      return fetch('/auth/token', {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({
+          payload: {
+            identifier: 'test@email.com',
+            name: 'Test user',
+            email: 'test@user.com',
+            phone: '18008675309'
+          }
+        })
+      }).then(function(resp) {
+        return resp.json();
+      });
+    }
+  </script>
+</body>
+</html>

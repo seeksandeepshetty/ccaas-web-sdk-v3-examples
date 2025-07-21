@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Key demo</title>
+  <style>
+    /* Basic styling for the banner */
+    .banner {
+      background-color: #f0f0f0; /* Light grey background */
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between; /* Aligns items to ends */
+      align-items: center; /* Vertically centers items */
+      font-family: sans-serif;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px; /* Gap below the banner */
+    }
+    .banner a {
+      text-decoration: none;
+      color: #007bff; /* Blue link color */
+      font-weight: bold;
+    }
+    .banner a:hover {
+      text-decoration: underline;
+    }
+    .banner span {
+      font-weight: bold;
+    }
+
+    /* Styling for the new Menu Key form */
+    .config-form {
+      margin-bottom: 20px; /* Space below the form */
+      padding: 15px;
+      border: 1px solid #eee;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      font-family: sans-serif;
+    }
+
+    .config-form label {
+      display: inline-block;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+
+    .config-form input[type="text"] {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      width: 200px; /* Adjust as needed */
+      margin-right: 10px;
+    }
+
+    .config-form button {
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s ease; /* Smooth transition for button color */
+    }
+
+    .config-form button:hover:not(:disabled) {
+      background-color: #0056b3; /* Darker blue on hover */
+    }
+
+    .config-form button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <span>Menu Key demo</span>
+    <a href="/">Demo list</a>
+  </div>
+
+  <div class="config-form">
+    <label for="menuKeyInput">Menu Key:</label>
+    <input type="text" id="menuKeyInput" value="__MENU_KEY__">
+    <button type="button" id="applyButton">Apply</button>
+  </div>
+
+  <div id="ccaas-widget"></div>
+
+  <script src="https://$CCAAS_HOST/web-sdk/v3/widget.js"></script>
+  <script>
+    var ccaas; // Declare ccaas globally so it can be accessed by event listener
+
+    function getAuthToken() {
+      // The `/auth/token` endpoint in this demo is powered by `app.js` at the source root
+      // YOU SHOULD HAVE THIS KIND OF API ON YOUR SERVER
+      return fetch('/auth/token', {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({
+          payload: {
+            identifier: 'test@email.com',
+            name: 'Test user',
+            email: 'test@user.com',
+            phone: '18008675309'
+          }
+        })
+      }).then(function(resp) {
+        return resp.json();
+      });
+    }
+
+    // Ensure the DOM is fully loaded before trying to access elements
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize UJET object only once
+      ccaas = new UJET({
+        companyId: "$COMPANY_ID",
+        host: "https://$CCAAS_HOST",
+        authenticate: getAuthToken
+      });
+
+      const menuKeyInput = document.getElementById('menuKeyInput');
+      const applyButton = document.getElementById('applyButton');
+
+      // Add event listener to the Apply button
+      applyButton.addEventListener('click', function() {
+        const enteredMenuKey = menuKeyInput.value;
+
+        // Disable the button immediately after it's pressed
+        applyButton.disabled = true;
+        applyButton.textContent = 'Applied'; // Change button text to indicate action
+
+        // Use .config to configure the menu key with the entered value
+        ccaas.config({
+          menuKey: enteredMenuKey,
+        });
+
+        // Mount the widget after configuration
+        ccaas.mount("#ccaas-widget");
+
+        // IMPORTANT: If you need to allow the user to re-apply a different
+        // menu key, you would need to re-enable the button here.
+        // However, the prompt specifies "disabled once pressed,"
+        // implying it stays disabled for this simple demo.
+        // Re-enabling might require listening for a widget 'ready' event
+        // or other logic specific to your application's needs.
+      });
+
+      // Optional: If you want the widget to load with the default '__MENU_KEY__'
+      // on page load, and then allow re-configuration via the form,
+      // you would call ccaas.config and ccaas.mount here initially.
+      // However, based on the prompt "Upon selecting Apply, the JavaScript: ... should then be executed",
+      // the config and mount are triggered by the button click.
+    });
+  </script>
+</body>
+</html>

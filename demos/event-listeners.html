@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event listeners</title>
+  <style>
+    /* NEW: Ensure html and body take full height and use flexbox */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column; /* Arrange children vertically */
+    }
+
+    /* Basic styling for the banner */
+    .banner {
+      background-color: #f0f0f0; /* Light grey background */
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between; /* Aligns items to ends */
+      align-items: center; /* Vertically centers items */
+      font-family: sans-serif;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px; /* Gap below the banner */
+      flex-shrink: 0; /* Prevents the banner from shrinking */
+    }
+    .banner a {
+      text-decoration: none;
+      color: #007bff; /* Blue link color */
+      font-weight: bold;
+    }
+    .banner a:hover {
+      text-decoration: underline;
+    }
+    .banner span {
+      font-weight: bold;
+    }
+
+    /* Styling for the new Event Log section */
+    .event-log-container {
+      margin-bottom: 20px; /* Space below the log */
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      background-color: #fdfdfd;
+      border-radius: 5px;
+      font-family: sans-serif;
+
+      /* NEW: Flexbox properties to make it grow */
+      flex-grow: 1; /* Allows the container to take up available space */
+      display: flex; /* Make its internal content a flex container */
+      flex-direction: column; /* Stack internal content vertically */
+      overflow: hidden; /* Prevents content from overflowing the container */
+    }
+
+    .event-log-container h3 {
+      margin-top: 0;
+      color: #333;
+      font-size: 1.1em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      flex-shrink: 0; /* Prevents the heading from shrinking */
+    }
+
+    .event-log-container ul {
+      list-style-type: none; /* Remove default bullet points */
+      padding: 0;
+      margin: 0;
+      /* Removed max-height: 200px; */ /* No longer needed, flexbox handles height */
+      flex-grow: 1; /* Allows the ul to take remaining height within its parent */
+      overflow-y: auto; /* Ensures the ul scrolls if its content overflows */
+      height: 0; /* Essential for flex-grow to work correctly with overflow-y: auto */
+    }
+
+    .event-log-container ul li {
+      background-color: #ffffff;
+      border-bottom: 1px dotted #f0f0f0;
+      padding: 8px 0;
+      font-size: 0.9em;
+      color: #555;
+      word-wrap: break-word; /* Break long words */
+    }
+
+    .event-log-container ul li:last-child {
+      border-bottom: none;
+    }
+
+    /* Styling for pretty-printed JSON */
+    .event-log-container pre {
+      background-color: #f0f0f0; /* Slightly darker background for code block */
+      padding: 8px 10px; /* Padding around the JSON */
+      margin-top: 5px; /* Space above the JSON block */
+      margin-left: 15px; /* Indent the JSON block */
+      border-radius: 3px;
+      font-size: 0.8em; /* Smaller font for JSON */
+      overflow-x: auto; /* Allow horizontal scrolling for long lines */
+      white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+      word-break: break-all; /* Force breaking words if necessary */
+    }
+    .event-log-container pre code {
+        font-family: monospace; /* Ensure monospace font for code */
+        display: block; /* Ensures pre-wrap and word-break properties apply correctly */
+    }
+
+    /* NEW: Prevents the widget container from shrinking */
+    #ccaas-widget {
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <span>Event listeners demo</span>
+    <a href="/">Demo list</a>
+  </div>
+
+  <div class="event-log-container">
+    <h3>Event Log</h3>
+    <ul id="eventLogList">
+      </ul>
+  </div>
+
+  <div id="ccaas-widget"></div>
+
+  <script src="https://$CCAAS_HOST/web-sdk/v3/widget.js"></script>
+  <script>
+    var ccaas = new UJET({
+      companyId: "$COMPANY_ID",
+      host: "https://$CCAAS_HOST",
+      authenticate: getAuthToken
+    });
+
+    // Helper function to add events to the log
+    function addEventToLog(eventName, eventData) {
+      const eventLogList = document.getElementById('eventLogList');
+      const listItem = document.createElement('li');
+      const timestamp = new Date().toLocaleTimeString(); // Get current time
+
+      let logText = `[${timestamp}] Event: ${eventName}`;
+      let dataElement = null; // This will hold the <pre> element for JSON
+
+      if (typeof eventData !== 'undefined') {
+        if (typeof eventData === 'object' && eventData !== null) {
+          // Special handling for 'chat.message' text, as it's often just text
+          if (eventName === 'chat.message' && eventData.text) {
+            logText += ` - Message: "${eventData.text}"`;
+          } else {
+            // Create a <pre><code> element for pretty printing JSON
+            dataElement = document.createElement('pre');
+            const codeElement = document.createElement('code');
+            try {
+              // Use JSON.stringify with 2 spaces for pretty printing
+              codeElement.textContent = JSON.stringify(eventData, null, 2);
+            } catch (e) {
+              codeElement.textContent = `[Unstringifiable object]`;
+            }
+            dataElement.appendChild(codeElement);
+          }
+        } else {
+          logText += ` - Data: ${eventData}`;
+        }
+      }
+
+      // Append the main text content of the log item
+      listItem.appendChild(document.createTextNode(logText));
+
+      // If there's a data element (for JSON), append it as a child to the list item
+      if (dataElement) {
+        listItem.appendChild(dataElement);
+      }
+
+      eventLogList.appendChild(listItem);
+
+      // Optional: Scroll to the bottom to show latest event
+      eventLogList.scrollTop = eventLogList.scrollHeight;
+    }
+
+    // Existing event listeners
+    ccaas.on('ready', function() {
+      console.log('**** ready');
+      addEventToLog('ready');
+    });
+
+    ccaas.on('visible', function(visible) {
+      console.log('**** visible:', visible);
+      addEventToLog('visible', visible);
+    });
+
+    ccaas.on('chat.message', function(message) {
+      console.log('**** message', message);
+      addEventToLog('chat.message', message);
+    });
+
+    // NEW EVENT LISTENERS ADDED BELOW:
+    ccaas.on('authenticated', function(data) {
+      console.log('**** authenticated', data);
+      addEventToLog('authenticated', data);
+    });
+
+    ccaas.on('chat.ongoing', function(chatData) {
+      console.log('**** chat.ongoing', chatData);
+      addEventToLog('chat.ongoing', chatData);
+    });
+
+    ccaas.on('chat.updated', function(chatData) {
+      console.log('**** chat.updated', chatData);
+      addEventToLog('chat.updated', chatData);
+    });
+
+    ccaas.on('chat.memberJoined', function(member) {
+      console.log('**** chat.memberJoined', member);
+      addEventToLog('chat.memberJoined', member);
+    });
+
+    ccaas.on('chat.memberLeft', function(member) {
+      console.log('**** chat.memberLeft', member);
+      addEventToLog('chat.memberLeft', member);
+    });
+
+    ccaas.on('chat.typingStarted', function(typingData) {
+      console.log('**** chat.typingStarted', typingData);
+      addEventToLog('chat.typingStarted', typingData);
+    });
+
+    ccaas.on('chat.typingEnded', function(typingData) {
+      console.log('**** chat.typingEnded', typingData);
+      addEventToLog('chat.typingEnded', typingData);
+    });
+
+    ccaas.on('chat.connected', function(chatData) {
+      console.log('**** chat.connected', chatData);
+      addEventToLog('chat.connected', chatData);
+    });
+
+    ccaas.on('chat.disconnected', function(chatData) {
+      console.log('**** chat.disconnected', chatData);
+      addEventToLog('chat.disconnected', chatData);
+    });
+
+    ccaas.on('chat.dismissed', function() { // Some events might not pass data
+      console.log('**** chat.dismissed');
+      addEventToLog('chat.dismissed');
+    });
+
+    ccaas.on('chat.timeout', function() {
+      console.log('**** chat.timeout');
+      addEventToLog('chat.timeout');
+    });
+
+    ccaas.on('chat.ended', function(chatData) {
+      console.log('**** chat.ended', chatData);
+      addEventToLog('chat.ended', chatData);
+    });
+
+    ccaas.on('chat.destroyed', function() {
+      console.log('**** chat.destroyed');
+      addEventToLog('chat.destroyed');
+    });
+
+    ccaas.on('cobrowse.request', function(requestData) {
+      console.log('**** cobrowse.request', requestData);
+      addEventToLog('cobrowse.request', requestData);
+    });
+
+    ccaas.on('cobrowse.loaded', function(cobrowseData) {
+      console.log('**** cobrowse.loaded', cobrowseData);
+      addEventToLog('cobrowse.loaded', cobrowseData);
+    });
+
+    ccaas.on('cobrowse.updated', function(cobrowseData) {
+      console.log('**** cobrowse.updated', cobrowseData);
+      addEventToLog('cobrowse.updated', cobrowseData);
+    });
+
+    ccaas.on('cobrowse.ended', function(cobrowseData) {
+      console.log('**** cobrowse.ended', cobrowseData);
+      addEventToLog('cobrowse.ended', cobrowseData);
+    });
+
+    ccaas.mount("#ccaas-widget");
+
+    function getAuthToken() {
+      // The `/auth/token` endpoint in this demo is powered by `app.js` at the source root
+      // YOU SHOULD HAVE THIS KIND OF API ON YOUR SERVER
+      return fetch('/auth/token', {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({
+          payload: {
+            identifier: 'test@email.com',
+            name: 'Test user',
+            email: 'test@user.com',
+            phone: '18008675309'
+          }
+        })
+      }).then(function(resp) {
+        return resp.json();
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signed Custom Data demo</title>
+  <style>
+    /* Basic styling for the banner */
+    .banner {
+      background-color: #f0f0f0; /* Light grey background */
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between; /* Aligns items to ends */
+      align-items: center; /* Vertically centers items */
+      font-family: sans-serif;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px; /* Gap below the banner */
+    }
+    .banner a {
+      text-decoration: none;
+      color: #007bff; /* Blue link color */
+      font-weight: bold;
+    }
+    .banner a:hover {
+      text-decoration: underline;
+    }
+    .banner span {
+      font-weight: bold;
+    }
+
+    /* Styling for the Custom Data form */
+    .custom-data-form {
+      margin-bottom: 20px; /* Space below the form */
+      padding: 15px;
+      border: 1px solid #eee;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      font-family: sans-serif;
+    }
+
+    .custom-data-form h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 1.1em;
+    }
+
+    .custom-data-pair {
+      display: flex;
+      gap: 10px; /* Space between inputs and button */
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .custom-data-pair input[type="text"] {
+      flex: 1; /* Allow inputs to grow */
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .custom-data-pair input[type="text"]:first-child {
+      flex: 1.2; /* Slightly more space for label */
+    }
+
+    .custom-data-pair input[type="text"]:last-of-type {
+      flex: 2; /* More space for value */
+    }
+
+    .custom-data-form button {
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+      margin-top: 10px; /* Space above buttons if they are block-level */
+      margin-right: 10px; /* Space between Add Pair and Apply buttons */
+    }
+
+    .custom-data-form button:last-child {
+      margin-right: 0;
+    }
+
+    .custom-data-form button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+
+    .custom-data-form button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .remove-pair-button {
+      background-color: #dc3545; /* Red for remove button */
+      margin-left: 0; /* Remove default button margin-left */
+      flex-shrink: 0; /* Prevent it from shrinking */
+    }
+
+    .remove-pair-button:hover:not(:disabled) {
+      background-color: #c82333;
+    }
+
+    /* Styling for the JSON output area */
+    .json-display-area {
+      margin-bottom: 20px; /* Space below the output */
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      background-color: #fdfdfd;
+      border-radius: 5px;
+      font-family: sans-serif;
+    }
+
+    .json-display-area h3 {
+      margin-top: 0;
+      color: #333;
+      font-size: 1.1em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+
+    .json-display-area pre {
+      background-color: #f0f0f0; /* Slightly darker background for code block */
+      padding: 8px 10px; /* Padding around the JSON */
+      margin-top: 5px; /* Space above the JSON block */
+      border-radius: 3px;
+      font-size: 0.8em; /* Smaller font for JSON */
+      overflow-x: auto; /* Allow horizontal scrolling for long lines */
+      white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+      word-break: break-all; /* Force breaking words if necessary */
+    }
+    .json-display-area pre code {
+        font-family: monospace; /* Ensure monospace font for code */
+        display: block; /* Ensures pre-wrap and word-break properties apply correctly */
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <span>Signed custom data demo</span>
+    <a href="/">Demo list</a>
+  </div>
+
+  <div class="custom-data-form">
+    <h3>Configure Custom Data to be Signed</h3>
+    <div id="customDataPairsContainer">
+      <div class="custom-data-pair">
+        <input type="text" class="custom-data-label" placeholder="Label (e.g., version)" value="Version">
+        <input type="text" class="custom-data-value" placeholder="Value (e.g., 1.0.0)" value="1.0.0">
+      </div>
+    </div>
+    <button type="button" id="addPairButton">Add Pair</button>
+    <button type="button" id="applyCustomDataButton">Apply Custom Data</button>
+  </div>
+
+  <div class="json-display-area">
+    <h3>Generated Custom Data (sent to server)</h3>
+    <pre><code id="customDataJsonOutput"></code></pre>
+  </div>
+
+  <div id="ccaas-widget"></div>
+
+  <script src="https://$CCAAS_HOST/web-sdk/v3/widget.js"></script>
+  <script>
+    var ccaas; // Declare ccaas globally
+
+    function getAuthToken() {
+      // The `/auth/token` endpoint in this demo is powered by `app.js` at the source root
+      // YOU SHOULD HAVE THIS KIND OF API ON YOUR SERVER
+      return fetch('/auth/token', {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({
+          payload: {
+            identifier: 'test@email.com',
+            name: 'Test user',
+            email: 'test@user.com',
+            phone: '18008675309'
+          }
+        })
+      }).then(function(resp) {
+        return resp.json();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize UJET object once DOM is loaded
+      ccaas = new UJET({
+        companyId: "$COMPANY_ID",
+        host: "https://$CCAAS_HOST",
+        authenticate: getAuthToken
+      });
+
+      const customDataPairsContainer = document.getElementById('customDataPairsContainer');
+      const addPairButton = document.getElementById('addPairButton');
+      const applyCustomDataButton = document.getElementById('applyCustomDataButton');
+      const customDataJsonOutput = document.getElementById('customDataJsonOutput'); // Get reference to output area
+
+      // Function to add a new pair of label/value inputs
+      function addNewPair(initialLabel = '', initialValue = '') {
+        const newPairDiv = document.createElement('div');
+        newPairDiv.classList.add('custom-data-pair');
+
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.classList.add('custom-data-label');
+        labelInput.placeholder = 'Label (e.g., product)';
+        labelInput.value = initialLabel;
+
+        const valueInput = document.createElement('input');
+        valueInput.type = 'text';
+        valueInput.classList.add('custom-data-value');
+        valueInput.placeholder = 'Value (e.g., 1.0.0)';
+        valueInput.value = initialValue;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.classList.add('remove-pair-button');
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', function() {
+          newPairDiv.remove(); // Remove the parent div (the pair)
+        });
+
+        newPairDiv.appendChild(labelInput);
+        newPairDiv.appendChild(valueInput);
+        newPairDiv.appendChild(removeButton);
+
+        customDataPairsContainer.appendChild(newPairDiv);
+      }
+
+      // Add event listener for the 'Add Pair' button
+      addPairButton.addEventListener('click', function() {
+        addNewPair(); // Add a new empty pair
+      });
+
+      // Function to generate the customData object from form inputs
+      function generateCustomData() {
+        const customDataObject = {};
+        const pairs = customDataPairsContainer.querySelectorAll('.custom-data-pair');
+
+        pairs.forEach(pairDiv => {
+          const labelInput = pairDiv.querySelector('.custom-data-label');
+          const valueInput = pairDiv.querySelector('.custom-data-value');
+
+          const label = labelInput.value.trim();
+          const value = valueInput.value.trim();
+
+          if (label && value) { // Only add if both label and value are non-empty
+            // Normalize the label for use as a key (e.g., lowercase and remove spaces)
+            const key = label.toLowerCase().replace(/\s+/g, ''); 
+            customDataObject[key] = {
+              label: label, // Keep original label for the 'label' property
+              value: value
+            };
+          }
+        });
+        return customDataObject;
+      }
+
+      // Add event listener for the 'Apply Custom Data' button
+      applyCustomDataButton.addEventListener('click', function() {
+        // Disable the button
+        applyCustomDataButton.disabled = true;
+        applyCustomDataButton.textContent = 'Applying...'; // Optional: change button text
+
+        const customDataToSend = generateCustomData(); // Get the custom data from the form
+
+        // Display the generated JSON object in the output area
+        customDataJsonOutput.textContent = JSON.stringify(customDataToSend, null, 2);
+
+        // Send the custom data to the server for signing
+        fetch('/auth/custom_data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          // The server endpoint expects the customData object within a 'customData' key
+          body: JSON.stringify({ customData: customDataToSend }) 
+        })
+        .then(resp => {
+          if (!resp.ok) {
+            throw new Error(`HTTP error! status: ${resp.status}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          // Assuming the server returns a 'token' property with the signed custom data
+          if (data && data.token) {
+            ccaas.config({
+              customData: data.token // Use the signed token returned by the server
+            });
+            ccaas.mount("#ccaas-widget"); // Mount the widget with the signed data
+            // Optionally re-enable the button here if you want the user to be able to re-apply
+            // applyCustomDataButton.disabled = false;
+            // applyCustomDataButton.textContent = 'Apply Custom Data';
+          } else {
+            console.error('Server did not return a customData token:', data);
+            customDataJsonOutput.textContent += '\nError: Server did not return a valid token.';
+            // Re-enable button on error
+            applyCustomDataButton.disabled = false;
+            applyCustomDataButton.textContent = 'Apply Custom Data (Error)';
+          }
+        })
+        .catch(error => {
+          console.error('Error sending custom data to server:', error);
+          customDataJsonOutput.textContent += `\nError: ${error.message}`;
+          // Re-enable button on error
+          applyCustomDataButton.disabled = false;
+          applyCustomDataButton.textContent = 'Apply Custom Data (Error)';
+        });
+      });
+
+      // Initial mount of the widget. This will mount without custom data from the form
+      // until the "Apply Custom Data" button is clicked and the server responds.
+      // The original code was fetching and then configuring/mounting, but for this
+      // dynamic demo, we initiate the process via the button.
+      ccaas.mount("#ccaas-widget");
+    });
+  </script>
+</body>
+</html>

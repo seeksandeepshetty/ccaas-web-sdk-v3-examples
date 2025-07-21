@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UJET Demo</title>
+  <style>
+    /* Basic styling for the banner */
+    .banner {
+      background-color: #f0f0f0; /* Light grey background */
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between; /* Aligns items to ends */
+      align-items: center; /* Vertically centers items */
+      font-family: sans-serif;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px; 
+    }
+    .banner a {
+      text-decoration: none;
+      color: #007bff; /* Blue link color */
+      font-weight: bold;
+    }
+    .banner a:hover {
+      text-decoration: underline;
+    }
+    .banner span {
+      font-weight: bold;
+    }
+    /* Basic styling for the example tables */
+    .example-table {
+      width: 100%;
+      border-collapse: collapse; /* Collapse borders for a cleaner look */
+      margin-bottom: 20px; /* Space between tables */
+      font-family: sans-serif;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for separation */
+      background-color: #fff;
+    }
+
+    .example-table thead th {
+      background-color: #f2f2f2; /* Light background for header */
+      text-align: left;
+      padding: 12px 15px;
+      font-size: 1.1em;
+      border-bottom: 2px solid #ddd; /* Separator below header */
+    }
+
+    .example-table tbody td {
+      padding: 10px 15px;
+      border: 1px solid #eee; /* Light border for cells */
+      vertical-align: top; /* Align content to the top */
+    }
+
+    .example-table tbody td:first-child {
+      width: 70%; /* Allocate more space for the description */
+    }
+
+    .example-table tbody td:last-child {
+     width: 30%; /* Allocate less space for the file name */
+      text-align: right; /* Align filename to the right */
+      white-space: nowrap; /* Prevent the file name from wrapping */
+    }
+
+    .example-table a {
+      color: #007bff; /* Standard link color */
+      text-decoration: none; /* Remove underline */
+      font-weight: bold;
+    }
+
+    .example-table a:hover {
+      text-decoration: underline; /* Underline on hover */
+    }
+  </style>
+</head>
+<body>
+ <div class="banner">
+    <span>CCaaS Web SDK v3 examples</span>
+  </div>
+<div class="examples-container">
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">A basic demo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>This demo showcases the most fundamental implementation of the widget, providing a simple integration example for quick setup.</td>
+        <td><a href="/basic.html">basic.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">Custom widget name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Learn how to personalize the widget's display name to align with your brand, application, or specific user context.</td>
+        <td><a href="/custom-name.html">custom-name.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">Listen on events</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Explore how to integrate event listeners with the widget to trigger custom actions, track user interactions, or update your application based on widget state changes.</td>
+        <td><a href="/event-listeners.html">event-listeners.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">Menu key demo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>This demo illustrates how to configure the widget with a specific menu key, allowing users to be directed to a predefined menu option within the system.<p>This is demonstrated by provding the ability to enter the menu key value in the text box and then applying it to the CCaaS SDK config.</td>
+        <td><a href="/menu-key.html">menu-key.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">Accent color</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>See how to easily change the primary accent color of the widget to seamlessly match your website's aesthetic and branding.</td>
+        <td><a href="/accent-color.html">accent-color.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">Customize with CSS variables</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>This advanced example demonstrates how to leverage CSS variables for fine-grained control over various aspects of the widget's appearance and layout.</td>
+        <td><a href="/css-variables.html">css-variables.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">Unsigned Custom data</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Learn how to pass non-authenticated custom data to the widget, useful for providing context or basic user information without authentication.</td>
+        <td><a href="/unsigned-custom-data.html">unsigned-custom-data.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">Signed Custom data</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>This demo covers the secure method of passing signed, authenticated custom data to the widget for sensitive information or robust user identification.</td>
+        <td><a href="/signed-custom-data.html">signed-custom-data.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="example-table">
+    <thead>
+      <tr>
+        <th colspan="2">External chat transfer</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>See how to seamlessly transfer users from an external chatbot environment to the widget for live agent assistance or specialized support.</td>
+        <td><a href="/external-chatbot-transfer.html">external-chatbot-transfer.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+  
+</div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accent color</title>
+  <style>
+    /* Basic styling for the banner */
+    .banner {
+      background-color: #f0f0f0; /* Light grey background */
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between; /* Aligns items to ends */
+      align-items: center; /* Vertically centers items */
+      font-family: sans-serif;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px; /* Gap below the banner */
+    }
+    .banner a {
+      text-decoration: none;
+      color: #007bff; /* Blue link color */
+      font-weight: bold;
+    }
+    .banner a:hover {
+      text-decoration: underline;
+    }
+    .banner span {
+      font-weight: bold;
+    }
+
+    /* Styling for the new Accent Color form */
+    .config-form {
+      margin-bottom: 20px; /* Space below the form */
+      padding: 15px;
+      border: 1px solid #eee;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      font-family: sans-serif;
+    }
+
+    .config-form label {
+      display: inline-block;
+      margin-right: 10px;
+      font-weight: bold;
+      vertical-align: middle; /* Align label with select */
+    }
+
+    /* Styling for the select dropdown */
+    .config-form select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      margin-right: 10px;
+      vertical-align: middle; /* Align select with label */
+      min-width: 100px; /* Ensure it's wide enough */
+      background-color: white;
+      cursor: pointer;
+    }
+
+    .config-form button {
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+      vertical-align: middle; /* Align button with select */
+    }
+
+    .config-form button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+
+    .config-form button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <span>Accent color demo</span>
+    <a href="/">Demo list</a>
+  </div>
+
+  <div class="config-form">
+    <label for="accentColorSelect">Accent Color:</label>
+    <select id="accentColorSelect">
+      <option value="blue">Blue</option>
+      <option value="green" selected>Green</option> <option value="purple">Purple</option>
+      <option value="orange">Orange</option>
+      <option value="yellow">Yellow</option>
+      <option value="gold">Gold</option>
+      <option value="red">Red</option>
+    </select>
+    <button type="button" id="applyButton">Apply</button>
+  </div>
+  
+  <div id="ccaas-widget"></div>
+
+  <script src="https://$CCAAS_HOST/web-sdk/v3/widget.js"></script>
+  <script>
+    var ccaas; // Declare ccaas globally
+
+    function getAuthToken() {
+      // The `/auth/token` endpoint in this demo is powered by `app.js` at the source root
+      // YOU SHOULD HAVE THIS KIND OF API ON YOUR SERVER
+      return fetch('/auth/token', {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({
+          payload: {
+            identifier: 'test@email.com',
+            name: 'Test user',
+            email: 'test@user.com',
+            phone: '18008675309'
+          }
+        })
+      }).then(function(resp) {
+        return resp.json();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize UJET object once DOM is loaded
+      ccaas = new UJET({
+        companyId: "$COMPANY_ID",
+        host: "https://$CCAAS_HOST",
+        authenticate: getAuthToken
+      });
+
+      const accentColorSelect = document.getElementById('accentColorSelect');
+      const applyButton = document.getElementById('applyButton');
+
+      applyButton.addEventListener('click', function() {
+        const selectedColor = accentColorSelect.value; // Get the selected color keyword
+
+        // Disable the button
+        applyButton.disabled = true;
+        applyButton.textContent = 'Applying...'; // Optional: change button text
+
+        // Configure and mount the widget with the selected accent color
+        ccaas.config({
+          accent: selectedColor
+        });
+
+        ccaas.mount("#ccaas-widget");
+
+        // If you need to re-enable the button after widget re-initialization/load,
+        // you would typically listen for a widget 'ready' event or similar.
+        // For this demo, it remains disabled as per previous requests' pattern.
+      });
+    });
+  </script>
+</body>
+</html>
