@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tasty Burgers Chat Demo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fffbe6;
+      margin: 0;
+      padding: 0;
+    }
+    .banner {
+      background-color: #d32f2f;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      font-size: 2em;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+    .landing-image {
+      display: block;
+      margin: 30px auto 20px auto;
+      max-width: 350px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 1.2em;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    #ccaas-widget {
+      margin: 0 auto;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">Tasty Burgers</div>
+  <img class="landing-image" src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80" alt="Tasty Burger">
+  <div class="subtitle">Welcome to Tasty Burgers! Chat with us for orders, support, or feedback.</div>
+  <div id="ccaas-widget"></div>
+  <script src="https://capgemini-9y95ecy.ue1.ccaiplatform.com/web-sdk/v3/widget.js"></script>
+  <script>
+    var ccaas = new UJET({
+      companyId: "17376779195574155d7dbc272a014a840",
+      host: "https://capgemini-9y95ecy.ue1.ccaiplatform.com",
+      companySecret: "f66b94c7007ecea0887dcfe98e82797272156703057888acfa818892104f1683",
+      authenticate: function() {
+        return fetch('/auth/token', {
+          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          body: JSON.stringify({
+            payload: {
+              identifier: 'customer@tastyburgers.com',
+              name: 'Tasty Customer',
+              email: 'customer@tastyburgers.com',
+              phone: '18001234567'
+            }
+          })
+        }).then(function(resp) { return resp.json(); });
+      }
+    });
+    ccaas.mount("#ccaas-widget");
+  </script>
+</body>
+</html>

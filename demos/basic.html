@@ -57,19 +57,18 @@
   <div id="ccaas-widget"></div>
 
   <!-- INCLUDE CCaaS WEB SDK Widget -->
-  <script src="https://$CCAAS_HOST/web-sdk/v3/widget.js"></script>
-  <script> 
+  <script src="https://capgemini-9y95ecy.ue1.ccaiplatform.com/web-sdk/v3/widget.js"></script>
+  <script>
     var ccaas = new UJET({
-      companyId: "$COMPANY_ID",
-      host: "https://$CCAAS_HOST",
+      companyId: "17376779195574155d7dbc272a014a840",
+      host: "https://capgemini-9y95ecy.ue1.ccaiplatform.com",
+      companySecret: "f66b94c7007ecea0887dcfe98e82797272156703057888acfa818892104f1683",
       authenticate: getAuthToken
     });
-      
+
     ccaas.mount("#ccaas-widget");
-  
+
     function getAuthToken() {
-      // The `/auth/token` endpoint in this demo is powered by `app.js` at the source root
-      // YOU SHOULD HAVE THIS KIND OF API ON YOUR SERVER
       return fetch('/auth/token', {
         headers: {
           'Content-Type': 'application/json'
